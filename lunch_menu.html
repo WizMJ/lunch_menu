@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:," />
+  <title>거버넌스관리팀의 점심 메뉴 정하기</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --paper: #f4f0e8;
+      --surface: #fffdf8;
+      --ink: #191816;
+      --muted: #635f57;
+      --line: #d9d1c2;
+      --accent: #e54b2a;
+      --accent-deep: #bc3217;
+      --accent-soft: #fee2d8;
+      --green: #2f6b4f;
+      --yellow: #f3c34e;
+      --shadow: 0 14px 36px rgba(67, 48, 27, .10);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #181714;
+        --surface: #24221d;
+        --ink: #f8f4e9;
+        --muted: #c7c0b3;
+        --line: #4a453c;
+        --accent: #ff6a46;
+        --accent-deep: #ff8a6e;
+        --accent-soft: #4b251c;
+        --green: #85c7a2;
+        --yellow: #e0b646;
+        --shadow: 0 16px 40px rgba(0, 0, 0, .26);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 0;
+      background:
+        radial-gradient(circle at 15% 8%, color-mix(in srgb, var(--yellow) 18%, transparent) 0 110px, transparent 111px),
+        var(--paper);
+      color: var(--ink);
+      font-family: "Noto Sans KR", sans-serif;
+      line-height: 1.55;
+    }
+    button { font: inherit; }
+    main { width: min(920px, 100%); margin: 0 auto; padding: 28px 18px 64px; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(220px, .65fr);
+      gap: 24px;
+      align-items: end;
+      padding: 24px 0 22px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-weight: 800; font-size: .88rem; }
+    h1 { margin: 0; max-width: 680px; font-size: clamp(2.05rem, 6vw, 4.5rem); line-height: 1.06; letter-spacing: -.06em; }
+    .intro p { margin: 14px 0 0; color: var(--muted); font-size: 1rem; max-width: 600px; }
+    .method-note {
+      padding: 16px 0 4px 18px;
+      border-left: 1px solid var(--line);
+      font-family: "Gowun Dodum", sans-serif;
+      color: var(--muted);
+    }
+    .method-note strong { display: block; color: var(--ink); font-family: "Noto Sans KR", sans-serif; margin-bottom: 5px; }
+
+    .panel {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      margin-top: 24px;
+      padding: clamp(20px, 4vw, 36px);
+      border-top: 5px solid var(--accent);
+    }
+    .steps { display: grid; gap: 25px; }
+    fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+    legend { padding: 0; margin-bottom: 11px; font-size: 1.02rem; font-weight: 800; }
+    legend span {
+      display: inline-grid; place-items: center; width: 25px; height: 25px;
+      margin-right: 8px; border-radius: 50%; background: var(--ink); color: var(--surface); font-size: .76rem;
+    }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .choice { position: relative; }
+    .choice input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 1;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .choice label {
+      display: block;
+      padding: 10px 15px;
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 85%, var(--paper));
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+    }
+    .choice input:focus-visible + label { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; }
+    .choice input:checked + label { background: var(--ink); border-color: var(--ink); color: var(--surface); transform: translateY(-1px); }
+
+    .action-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 28px; }
+    .pick-btn {
+      min-height: 58px; border: 0; background: var(--accent); color: #fff; padding: 14px 22px;
+      font-weight: 800; font-size: 1.08rem; cursor: pointer; box-shadow: inset 0 -3px 0 rgba(91, 23, 8, .22);
+    }
+    .pick-btn:hover { background: var(--accent-deep); }
+    .pick-btn:active { transform: translateY(2px); box-shadow: none; }
+    .surprise {
+      min-height: 58px; border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 12px 18px; cursor: pointer; font-weight: 700;
+    }
+
+    .result {
+      display: none;
+      margin-top: 26px;
+      padding: clamp(22px, 5vw, 40px);
+      background: var(--ink);
+      color: var(--surface);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .result::after {
+      content: ""; position: absolute; right: -55px; top: -55px; width: 190px; height: 190px;
+      border: 38px solid var(--accent); border-radius: 50%; opacity: .9; z-index: -1;
+    }
+    .result.show { display: block; }
+    .result.loading .menu-name { animation: flicker .1s steps(1) infinite; }
+    @keyframes flicker { 50% { opacity: .35; } }
+    .result-label { margin: 0; color: var(--yellow); font-weight: 700; font-size: .88rem; }
+    .menu-name { margin: 7px 0 8px; font-size: clamp(2.3rem, 9vw, 5.6rem); line-height: 1; letter-spacing: -.06em; word-break: keep-all; }
+    .reason { margin: 0; max-width: 580px; color: color-mix(in srgb, var(--surface) 82%, transparent); }
+    .reroll { margin-top: 22px; border: 1px solid color-mix(in srgb, var(--surface) 46%, transparent); background: transparent; color: var(--surface); padding: 9px 13px; cursor: pointer; }
+
+    .menu-board { margin-top: 34px; }
+    .menu-board h2 { margin: 0 0 14px; font-size: 1.35rem; letter-spacing: -.03em; }
+    .menu-groups { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+    .menu-group { border-top: 1px solid var(--ink); padding-top: 12px; }
+    .menu-group-title { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 9px; color: var(--muted); font-size: .83rem; }
+    .tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag { padding: 6px 9px; background: var(--surface); border: 1px solid var(--line); font-size: .88rem; }
+
+    .logic {
+      margin-top: 28px; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start;
+    }
+    .logic .mark { font-size: 2rem; line-height: 1; color: var(--green); font-weight: 800; }
+    .logic h2 { margin: 0 0 5px; font-size: 1rem; }
+    .logic p { margin: 0; color: var(--muted); font-size: .9rem; }
+
+    .mode-tabs {
+      display: flex;
+      gap: 0;
+      margin-top: 24px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .mode-tab {
+      flex: 1;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .mode-tab + .mode-tab { border-left: 0; }
+    .mode-tab[aria-selected="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+    .mode-tab:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; }
+    .tab-panel[hidden] { display: none; }
+    .mode-tabs + .tab-panel > .panel { margin-top: 0; }
+
+    .roulette-panel { margin-top: 0; }
+    .roulette-heading { margin: 0 0 5px; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.04em; }
+    .roulette-lead { margin: 0 0 20px; color: var(--muted); }
+    .roulette-layout { display: grid; grid-template-columns: minmax(280px, 1.15fr) minmax(190px, .85fr); gap: 30px; align-items: center; }
+    .wheel-wrap { position: relative; width: min(100%, 500px); aspect-ratio: 1; margin-inline: auto; }
+    .roulette-wheel {
+      display: block; width: 100%; height: 100%; filter: drop-shadow(0 12px 18px rgba(44, 31, 18, .16));
+      transform-origin: 50% 50%; will-change: transform;
+    }
+    .wheel-segment { stroke: var(--surface); stroke-width: 4; }
+    .wheel-label { fill: #191816; font-family: "Noto Sans KR", sans-serif; font-weight: 800; font-size: 26px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .wheel-label.compact { font-size: 14px; letter-spacing: -.1em; }
+    .wheel-label.tiny { font-size: 11px; letter-spacing: -.12em; }
+    .wheel-pointer {
+      position: absolute; z-index: 3; top: -4px; left: 50%; width: 0; height: 0;
+      transform: translateX(-50%); border-left: 16px solid transparent; border-right: 16px solid transparent; border-top: 34px solid var(--accent-deep);
+      filter: drop-shadow(0 3px 2px rgba(0,0,0,.18));
+    }
+    .wheel-hub {
+      position: absolute; z-index: 2; left: 50%; top: 50%; width: 58px; height: 58px;
+      transform: translate(-50%, -50%); border-radius: 50%; background: var(--ink); border: 7px solid var(--surface);
+      box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    }
+    .roulette-action { border-top: 2px solid var(--ink); padding-top: 18px; }
+    .roulette-action p { margin: 0 0 16px; color: var(--muted); font-family: "Gowun Dodum", sans-serif; font-size: 1.05rem; }
+    .wheel-legend { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; color: var(--muted); font-size: .78rem; }
+    .wheel-legend li { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .wheel-legend i { width: 10px; height: 10px; flex: 0 0 10px; background: var(--swatch); border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); }
+    .roulette-action .pick-btn { width: 100%; }
+    .roulette-result { margin-top: 24px; }
+    .roulette-result .menu-name { font-size: clamp(2.2rem, 7vw, 4.7rem); }
+
+    .ladder-panel { margin-top: 0; }
+    .ladder-heading { margin: 0 0 5px; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.04em; }
+    .ladder-lead { margin: 0 0 24px; color: var(--muted); }
+    .ladder-controls { display: flex; justify-content: flex-end; margin-top: 4px; }
+    .build-ladder {
+      border: 1px solid var(--line); background: transparent; color: var(--ink);
+      padding: 10px 14px; font-weight: 700; cursor: pointer;
+    }
+    .build-ladder:hover { border-color: var(--accent); color: var(--accent-deep); }
+    .build-ladder:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; }
+    .ladder-stage { margin-top: 18px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .ladder-instruction { margin: 0 0 12px; color: var(--muted); font-size: .92rem; }
+    .ladder-names, .ladder-menus { display: grid; gap: 4px; }
+    .ladder-name {
+      min-width: 0; padding: 8px 3px; border: 0; border-bottom: 3px solid var(--accent);
+      background: color-mix(in srgb, var(--accent-soft) 65%, var(--surface)); color: var(--ink);
+      font-weight: 800; font-size: clamp(.68rem, 2.2vw, .92rem); cursor: pointer; overflow-wrap: anywhere;
+    }
+    .ladder-name:disabled { cursor: wait; opacity: .66; }
+    .ladder-name.done { border-bottom-color: var(--green); }
+    .ladder-name:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; }
+    .ladder-canvas { width: 100%; height: auto; display: block; color: var(--ink); }
+    .ladder-base { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 4; }
+    .ladder-route { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+    .ladder-menus { margin-top: 5px; }
+    .ladder-menu { min-width: 0; padding: 8px 2px; text-align: center; color: var(--muted); font-size: clamp(.62rem, 2vw, .84rem); font-weight: 700; overflow-wrap: anywhere; }
+    .ladder-menu.winner { background: var(--green); color: var(--surface); }
+    .ladder-result { display: none; margin-top: 18px; padding: 18px; background: var(--ink); color: var(--surface); }
+    .ladder-result.show { display: block; }
+    .ladder-result p { margin: 0; color: var(--yellow); font-size: .84rem; font-weight: 700; }
+    .ladder-result strong { display: block; margin-top: 4px; font-size: clamp(1.55rem, 6vw, 2.5rem); letter-spacing: -.04em; }
+
+    .weather-panel { margin-top: 0; }
+    .weather-heading { margin: 0 0 5px; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.04em; }
+    .weather-lead { margin: 0 0 24px; color: var(--muted); }
+    .weather-form { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .weather-form fieldset { padding-top: 16px; border-top: 1px solid var(--line); }
+    .weather-form fieldset:last-child { grid-column: 1 / -1; }
+    .weather-form .choices { gap: 9px; }
+    .weather-form .choice label { min-width: 76px; text-align: center; }
+    .recommend-action { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; margin-top: 26px; }
+    .recommend-status { margin: 0; color: var(--muted); font-size: .9rem; }
+    .recommend-action .pick-btn { min-width: 190px; }
+    .recommendations { display: none; margin-top: 28px; padding-top: 24px; border-top: 2px solid var(--ink); }
+    .recommendations.show { display: block; }
+    .recommendation-heading { margin: 0 0 5px; font-size: 1.3rem; letter-spacing: -.03em; }
+    .recommendation-summary { margin: 0 0 18px; color: var(--muted); }
+    .recommendation-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .recommendation-card {
+      display: grid; grid-template-columns: 42px minmax(110px, .38fr) 1fr; gap: 14px; align-items: center;
+      padding: 16px 0; border-top: 1px solid var(--line);
+    }
+    .recommendation-rank {
+      display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent-deep); font-weight: 800;
+    }
+    .recommendation-card:first-child .recommendation-rank { background: var(--accent); color: #fff; }
+    .recommendation-name { margin: 0; font-size: 1.18rem; letter-spacing: -.03em; }
+    .recommendation-reason { margin: 0; color: var(--muted); font-size: .92rem; }
+
+    @media (max-width: 680px) {
+      main { padding-top: 12px; }
+      .intro { grid-template-columns: 1fr; gap: 15px; }
+      .method-note { border-left: 0; border-top: 1px solid var(--line); padding: 14px 0 0; }
+      .panel { padding: 20px 16px; }
+      .choice label { padding: 9px 12px; font-size: .9rem; }
+      .action-row { grid-template-columns: 1fr; }
+      .menu-groups { grid-template-columns: 1fr; }
+      .roulette-layout { grid-template-columns: 1fr; gap: 20px; }
+      .wheel-wrap { width: min(100%, 360px); }
+      .wheel-label { font-size: 24px; }
+      .wheel-label.compact { font-size: 13px; }
+      .wheel-label.tiny { font-size: 10px; }
+      .roulette-action { text-align: center; }
+      .mode-tab { min-height: 48px; padding-inline: 6px; font-size: .82rem; }
+      .ladder-panel { padding-inline: 12px; }
+      .ladder-name { min-height: 44px; padding-inline: 0; }
+      .ladder-menu { writing-mode: vertical-rl; min-height: 72px; display: grid; place-items: center; justify-self: stretch; }
+      .weather-form { grid-template-columns: 1fr; gap: 20px; }
+      .weather-form fieldset:last-child { grid-column: auto; }
+      .weather-form .choice { flex: 1 1 calc(33.333% - 8px); }
+      .weather-form .choice label { min-width: 0; padding-inline: 7px; }
+      .recommend-action { grid-template-columns: 1fr; }
+      .recommend-action .pick-btn { width: 100%; }
+      .recommendation-card { grid-template-columns: 38px 1fr; gap: 7px 10px; align-items: start; }
+      .recommendation-reason { grid-column: 2; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="intro" aria-labelledby="page-title">
+    <div>
+      <p class="eyebrow">팀 점심 고민, 10초면 끝</p>
+      <h1 id="page-title">거버넌스관리팀의 점심 메뉴 정하기</h1>
+      <p>11개 메뉴를 룰렛으로 돌리거나, 사다리를 타거나, 오늘의 날씨와 컨디션에 맞춰 골라보세요.</p>
+    </div>
+    <aside class="method-note">
+      <strong>세 가지 방식, 맛있는 결론</strong>
+      빠른 결정은 룰렛, 함께 즐길 땐 사다리, 오늘 딱 맞는 한 끼는 날씨·컨디션 추천이 좋아요.
+    </aside>
+  </section>
+
+  <div class="mode-tabs" role="tablist" aria-label="메뉴 고르기 방식">
+    <button class="mode-tab" id="roulette-tab" type="button" role="tab" aria-selected="true" aria-controls="roulette-panel">룰렛</button>
+    <button class="mode-tab" id="ladder-tab" type="button" role="tab" aria-selected="false" aria-controls="ladder-panel" tabindex="-1">사다리타기</button>
+    <button class="mode-tab" id="weather-tab" type="button" role="tab" aria-selected="false" aria-controls="weather-panel" tabindex="-1">날씨·컨디션</button>
+  </div>
+
+  <div class="tab-panel" id="roulette-panel" role="tabpanel" aria-labelledby="roulette-tab">
+    <section class="panel roulette-panel" aria-labelledby="roulette-title">
+      <h2 class="roulette-heading" id="roulette-title">11개 메뉴 룰렛</h2>
+      <p class="roulette-lead">선호 비중만큼 칸의 크기와 당첨 확률이 달라요.</p>
+
+      <div class="roulette-layout">
+        <div class="wheel-wrap">
+          <div class="wheel-pointer" aria-hidden="true"></div>
+          <svg class="roulette-wheel" id="roulette-wheel" viewBox="0 0 600 600" role="img" aria-label="선호 비중에 따라 칸 크기와 당첨 확률이 조정된 11개 점심 메뉴 룰렛"></svg>
+          <div class="wheel-hub" aria-hidden="true"></div>
+        </div>
+        <div class="roulette-action">
+          <p>무엇이 나오든 오늘 점심은 이걸로!</p>
+          <ul class="wheel-legend" aria-label="작은 룰렛 칸 안내">
+            <li><i style="--swatch:#94c7d5" aria-hidden="true"></i>회덮밥 4.5%</li>
+            <li><i style="--swatch:#b7b8d8" aria-hidden="true"></i>돈가스 4.5%</li>
+            <li><i style="--swatch:#d9a9c2" aria-hidden="true"></i>추어탕 4.5%</li>
+            <li><i style="--swatch:#df9c7d" aria-hidden="true"></i>갈비탕 4.5%</li>
+          </ul>
+          <button class="pick-btn" id="spin-roulette" type="button">룰렛 돌리기</button>
+        </div>
+      </div>
+
+      <section class="result roulette-result" id="roulette-result" aria-live="polite" aria-atomic="true">
+        <p class="result-label">룰렛이 고른 오늘의 메뉴</p>
+        <h2 class="menu-name" id="roulette-menu-name">김치찌개</h2>
+        <button class="reroll" id="spin-again" type="button">다시 돌리기</button>
+      </section>
+    </section>
+
+    <section class="menu-board" aria-labelledby="menu-title">
+      <h2 id="menu-title">룰렛에 들어간 메뉴 11개</h2>
+      <div class="menu-groups">
+        <div class="menu-group">
+          <div class="menu-group-title"><strong>자주 먹는 메뉴</strong><span>6개</span></div>
+          <div class="tags"><span class="tag">김치찌개 18%</span><span class="tag">부대찌개 4%</span><span class="tag">제육볶음 16%</span><span class="tag">피자 14%</span><span class="tag">순대국밥 12%</span><span class="tag">중국집 10%</span></div>
+        </div>
+        <div class="menu-group">
+          <div class="menu-group-title"><strong>가끔 먹는 메뉴</strong><span>5개</span></div>
+          <div class="tags"><span class="tag">햄버거 8%</span><span class="tag">회덮밥 4.5%</span><span class="tag">돈가스 4.5%</span><span class="tag">추어탕 4.5%</span><span class="tag">갈비탕 4.5%</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="tab-panel" id="ladder-panel" role="tabpanel" aria-labelledby="ladder-tab" hidden>
+    <div class="panel ladder-panel">
+      <h2 class="ladder-heading">번호 하나로 사다리타기</h2>
+      <p class="ladder-lead">11개 메뉴 중 무작위로 고른 10개를 사다리 아래에 놓았어요.</p>
+
+      <div class="ladder-controls">
+        <button class="build-ladder" id="build-ladder" type="button">사다리 새로 섞기</button>
+      </div>
+
+      <div class="ladder-stage" id="ladder-stage">
+        <p class="ladder-instruction">위쪽의 1~10 중 하나를 누르면 선이 메뉴까지 내려갑니다.</p>
+        <div class="ladder-names" id="ladder-names"></div>
+        <svg class="ladder-canvas" id="ladder-canvas" viewBox="0 0 1000 440" role="img" aria-label="무작위로 만들어진 사다리"></svg>
+        <div class="ladder-menus" id="ladder-menus"></div>
+        <div class="ladder-result" id="ladder-result" aria-live="polite">
+          <p id="ladder-result-name"></p>
+          <strong id="ladder-result-menu"></strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="weather-panel" role="tabpanel" aria-labelledby="weather-tab" hidden>
+    <div class="panel weather-panel">
+      <h2 class="weather-heading">오늘에 맞는 메뉴 3가지</h2>
+      <p class="weather-lead">날씨, 컨디션, 예산, 시간 여유, 팀장님 기분을 고르면 11개 메뉴를 비교해 이유와 함께 추천해요.</p>
+
+      <div class="weather-form">
+        <fieldset>
+          <legend><span>1</span>오늘 날씨</legend>
+          <div class="choices">
+            <div class="choice"><input type="radio" name="weather" id="weather-sunny" value="sunny"><label for="weather-sunny">맑음</label></div>
+            <div class="choice"><input type="radio" name="weather" id="weather-cloudy" value="cloudy"><label for="weather-cloudy">흐림</label></div>
+            <div class="choice"><input type="radio" name="weather" id="weather-rain" value="rain"><label for="weather-rain">비</label></div>
+            <div class="choice"><input type="radio" name="weather" id="weather-snow" value="snow"><label for="weather-snow">눈</label></div>
+            <div class="choice"><input type="radio" name="weather" id="weather-hot" value="hot"><label for="weather-hot">더움</label></div>
+            <div class="choice"><input type="radio" name="weather" id="weather-cold" value="cold"><label for="weather-cold">추움</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>2</span>오늘 컨디션</legend>
+          <div class="choices">
+            <div class="choice"><input type="radio" name="condition" id="condition-hangover" value="hangover"><label for="condition-hangover">해장 필요</label></div>
+            <div class="choice"><input type="radio" name="condition" id="condition-hearty" value="hearty"><label for="condition-hearty">든든하게</label></div>
+            <div class="choice"><input type="radio" name="condition" id="condition-light" value="light"><label for="condition-light">가볍게</label></div>
+            <div class="choice"><input type="radio" name="condition" id="condition-cool" value="cool"><label for="condition-cool">시원하게</label></div>
+            <div class="choice"><input type="radio" name="condition" id="condition-warm" value="warm"><label for="condition-warm">따뜻하게</label></div>
+            <div class="choice"><input type="radio" name="condition" id="condition-refresh" value="refresh"><label for="condition-refresh">기분전환</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>3</span>오늘 예산</legend>
+          <div class="choices">
+            <div class="choice"><input type="radio" name="budget" id="budget-value" value="value"><label for="budget-value">가성비로</label></div>
+            <div class="choice"><input type="radio" name="budget" id="budget-spend" value="spend"><label for="budget-spend">오늘은 좀 써도 돼</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>4</span>시간 여유</legend>
+          <div class="choices">
+            <div class="choice"><input type="radio" name="time" id="time-relaxed" value="relaxed"><label for="time-relaxed">여유 있어</label></div>
+            <div class="choice"><input type="radio" name="time" id="time-rush" value="rush"><label for="time-rush">빨리 먹어야 해</label></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>5</span>알버트 팀장의 기분상태</legend>
+          <div class="choices">
+            <div class="choice"><input type="radio" name="mood" id="mood-good" value="good"><label for="mood-good">좋음</label></div>
+            <div class="choice"><input type="radio" name="mood" id="mood-neutral" value="neutral"><label for="mood-neutral">보통</label></div>
+            <div class="choice"><input type="radio" name="mood" id="mood-bad" value="bad"><label for="mood-bad">안 좋음</label></div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="recommend-action">
+        <p class="recommend-status" id="recommend-status">5가지 질문에 모두 답해주세요.</p>
+        <button class="pick-btn" id="recommend-menu" type="button">메뉴 3개 추천받기</button>
+      </div>
+
+      <section class="recommendations" id="recommendations" aria-live="polite" aria-atomic="true">
+        <h3 class="recommendation-heading">오늘의 추천 순서</h3>
+        <p class="recommendation-summary" id="recommendation-summary"></p>
+        <ol class="recommendation-list" id="recommendation-list"></ol>
+      </section>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var menus = [
+    { name: '김치찌개', weight: 18 },
+    { name: '부대찌개', weight: 4 },
+    { name: '제육볶음', weight: 16 },
+    { name: '피자', weight: 14 },
+    { name: '순대국밥', weight: 12 },
+    { name: '중국집', weight: 10 },
+    { name: '햄버거', weight: 8 },
+    { name: '회덮밥', weight: 4.5 },
+    { name: '돈가스', weight: 4.5 },
+    { name: '추어탕', weight: 4.5 },
+    { name: '갈비탕', weight: 4.5 }
+  ];
+
+  var rouletteWheel = document.getElementById('roulette-wheel');
+  var spinButton = document.getElementById('spin-roulette');
+  var spinAgainButton = document.getElementById('spin-again');
+  var rouletteResult = document.getElementById('roulette-result');
+  var rouletteMenuName = document.getElementById('roulette-menu-name');
+  var wheelRotation = 0;
+  var wheelSpinning = false;
+  var wheelSvgNS = 'http://www.w3.org/2000/svg';
+  var wheelColors = ['#f3c34e', '#f39b63', '#ee7960', '#f0b65b', '#d8c977', '#8bc4a6', '#76b4ae', '#94c7d5', '#b7b8d8', '#d9a9c2', '#df9c7d'];
+
+  function polar(cx, cy, radius, angle) {
+    var radians = (angle - 90) * Math.PI / 180;
+    return { x: cx + radius * Math.cos(radians), y: cy + radius * Math.sin(radians) };
+  }
+
+  function segmentPath(startAngle, endAngle) {
+    var startPoint = polar(300, 300, 282, endAngle);
+    var endPoint = polar(300, 300, 282, startAngle);
+    var largeArc = endAngle - startAngle <= 180 ? 0 : 1;
+    return ['M', 300, 300, 'L', startPoint.x, startPoint.y, 'A', 282, 282, 0, largeArc, 0, endPoint.x, endPoint.y, 'Z'].join(' ');
+  }
+
+  function rouletteSegments() {
+    var totalWeight = menus.reduce(function (sum, menu) { return sum + menu.weight; }, 0);
+    var firstSweep = menus[0].weight / totalWeight * 360;
+    var angle = -firstSweep / 2;
+    return menus.map(function (menu) {
+      var sweep = menu.weight / totalWeight * 360;
+      var segment = { start: angle, end: angle + sweep, center: angle + sweep / 2, sweep: sweep };
+      angle += sweep;
+      return segment;
+    });
+  }
+
+  function buildRoulette() {
+    var segments = rouletteSegments();
+    while (rouletteWheel.firstChild) rouletteWheel.removeChild(rouletteWheel.firstChild);
+    menus.forEach(function (menu, index) {
+      var segment = segments[index];
+      var path = document.createElementNS(wheelSvgNS, 'path');
+      path.setAttribute('d', segmentPath(segment.start, segment.end));
+      path.setAttribute('fill', wheelColors[index]);
+      path.setAttribute('class', 'wheel-segment');
+      rouletteWheel.appendChild(path);
+
+      var isTiny = menu.weight <= 2;
+      var isCompact = menu.weight > 2 && menu.weight <= 5;
+      var labelRadius = isTiny ? 232 : (isCompact ? 218 : 202);
+      var labelPoint = polar(300, 300, labelRadius, segment.center);
+      var label = document.createElementNS(wheelSvgNS, 'text');
+      label.setAttribute('x', labelPoint.x);
+      label.setAttribute('y', labelPoint.y);
+      label.setAttribute('class', 'wheel-label' + (isTiny ? ' tiny' : (isCompact ? ' compact' : '')));
+      label.setAttribute('transform', 'rotate(' + (segment.center + (isTiny || isCompact ? 90 : 0)) + ' ' + labelPoint.x + ' ' + labelPoint.y + ')');
+      label.textContent = menu.name;
+      rouletteWheel.appendChild(label);
+    });
+  }
+
+  function spinRoulette() {
+    if (wheelSpinning) return;
+    wheelSpinning = true;
+    rouletteResult.classList.remove('show');
+    spinButton.disabled = true;
+    spinAgainButton.disabled = true;
+
+    var totalWeight = menus.reduce(function (sum, menu) { return sum + menu.weight; }, 0);
+    var draw = Math.random() * totalWeight;
+    var cumulative = 0;
+    var selected = menus.length - 1;
+    for (var index = 0; index < menus.length; index++) {
+      cumulative += menus[index].weight;
+      if (draw < cumulative) {
+        selected = index;
+        break;
+      }
+    }
+
+    var segment = rouletteSegments()[selected];
+    var targetAngle = segment.center + (Math.random() - .5) * segment.sweep * .6;
+    var desired = ((360 - targetAngle) % 360 + 360) % 360;
+    var currentMod = ((wheelRotation % 360) + 360) % 360;
+    var delta = ((desired - currentMod + 360) % 360) + (5 + Math.floor(Math.random() * 3)) * 360;
+    wheelRotation += delta;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    rouletteWheel.style.transition = reduced ? 'none' : 'transform 3.6s cubic-bezier(.18,.72,.16,1)';
+    rouletteWheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+
+    window.setTimeout(function () {
+      rouletteMenuName.textContent = menus[selected].name;
+      rouletteResult.classList.add('show');
+      spinButton.disabled = false;
+      spinAgainButton.disabled = false;
+      wheelSpinning = false;
+      rouletteResult.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest' });
+    }, reduced ? 20 : 3650);
+  }
+
+  buildRoulette();
+  spinButton.addEventListener('click', spinRoulette);
+  spinAgainButton.addEventListener('click', spinRoulette);
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.mode-tab'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.tab-panel'));
+
+  function selectTab(tab) {
+    tabs.forEach(function (item) {
+      var selected = item === tab;
+      item.setAttribute('aria-selected', selected ? 'true' : 'false');
+      item.tabIndex = selected ? 0 : -1;
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = panel.id !== tab.getAttribute('aria-controls');
+    });
+  }
+
+  tabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () { selectTab(tab); });
+    tab.addEventListener('keydown', function (event) {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      var next = event.key === 'ArrowRight' ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
+      selectTab(tabs[next]);
+      tabs[next].focus();
+    });
+  });
+
+  var buildButton = document.getElementById('build-ladder');
+  var ladderStage = document.getElementById('ladder-stage');
+  var ladderNames = document.getElementById('ladder-names');
+  var ladderMenus = document.getElementById('ladder-menus');
+  var ladderCanvas = document.getElementById('ladder-canvas');
+  var ladderResult = document.getElementById('ladder-result');
+  var ladderResultName = document.getElementById('ladder-result-name');
+  var ladderResultMenu = document.getElementById('ladder-result-menu');
+  var ladderState = null;
+  var isTracing = false;
+  var svgNS = 'http://www.w3.org/2000/svg';
+
+  function shuffledMenuNames(count) {
+    var names = menus.map(function (menu) { return menu.name; });
+    for (var i = names.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = names[i]; names[i] = names[j]; names[j] = temp;
+    }
+    return names.slice(0, count);
+  }
+
+  function makeRungs(count) {
+    var rungs = [];
+    var levels = Math.max(7, count * 2);
+    for (var level = 0; level < levels; level++) {
+      var candidates = [];
+      for (var c = 0; c < count - 1; c++) candidates.push(c);
+      for (var k = candidates.length - 1; k > 0; k--) {
+        var swapAt = Math.floor(Math.random() * (k + 1));
+        var swap = candidates[k]; candidates[k] = candidates[swapAt]; candidates[swapAt] = swap;
+      }
+      var occupied = {};
+      var made = false;
+      for (var m = 0; m < candidates.length; m++) {
+        var left = candidates[m];
+        if (!occupied[left] && !occupied[left + 1] && Math.random() < .42) {
+          rungs.push({ left: left, y: 55 + level * (330 / (levels - 1)) });
+          occupied[left] = true;
+          occupied[left + 1] = true;
+          made = true;
+        }
+      }
+      if (!made && count > 1) {
+        var forced = Math.floor(Math.random() * (count - 1));
+        rungs.push({ left: forced, y: 55 + level * (330 / (levels - 1)) });
+      }
+    }
+    return rungs.sort(function (a, b) { return a.y - b.y; });
+  }
+
+  function xPositions(count) {
+    var points = [];
+    for (var i = 0; i < count; i++) points.push(50 + i * (900 / (count - 1)));
+    return points;
+  }
+
+  function svgLine(x1, y1, x2, y2, className) {
+    var line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('class', className);
+    return line;
+  }
+
+  function drawLadder(count, rungs, xs) {
+    while (ladderCanvas.firstChild) ladderCanvas.removeChild(ladderCanvas.firstChild);
+    for (var i = 0; i < count; i++) ladderCanvas.appendChild(svgLine(xs[i], 20, xs[i], 420, 'ladder-base'));
+    rungs.forEach(function (rung) {
+      ladderCanvas.appendChild(svgLine(xs[rung.left], rung.y, xs[rung.left + 1], rung.y, 'ladder-base'));
+    });
+  }
+
+  function tracePoints(start, rungs, xs) {
+    var current = start;
+    var points = [{ x: xs[current], y: 20 }];
+    rungs.forEach(function (rung) {
+      if (rung.left === current) {
+        points.push({ x: xs[current], y: rung.y });
+        current++;
+        points.push({ x: xs[current], y: rung.y });
+      } else if (rung.left + 1 === current) {
+        points.push({ x: xs[current], y: rung.y });
+        current--;
+        points.push({ x: xs[current], y: rung.y });
+      }
+    });
+    points.push({ x: xs[current], y: 420 });
+    return { points: points, destination: current };
+  }
+
+  function showTrace(start) {
+    if (!ladderState || isTracing) return;
+    isTracing = true;
+    ladderResult.classList.remove('show');
+    var oldRoute = ladderCanvas.querySelector('.ladder-route');
+    if (oldRoute) oldRoute.remove();
+    Array.prototype.forEach.call(ladderMenus.children, function (menu) { menu.classList.remove('winner'); });
+    Array.prototype.forEach.call(ladderNames.children, function (button) {
+      button.disabled = true;
+      button.classList.remove('done');
+    });
+
+    var traced = tracePoints(start, ladderState.rungs, ladderState.xs);
+    var polyline = document.createElementNS(svgNS, 'polyline');
+    polyline.setAttribute('class', 'ladder-route');
+    polyline.setAttribute('points', traced.points.map(function (point) { return point.x + ',' + point.y; }).join(' '));
+    ladderCanvas.appendChild(polyline);
+    var length = polyline.getTotalLength();
+    polyline.style.strokeDasharray = length;
+    polyline.style.strokeDashoffset = length;
+    polyline.getBoundingClientRect();
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    polyline.style.transition = reduced ? 'none' : 'stroke-dashoffset 1.15s ease-in-out';
+    polyline.style.strokeDashoffset = '0';
+
+    window.setTimeout(function () {
+      var menuName = ladderState.menuNames[traced.destination];
+      ladderMenus.children[traced.destination].classList.add('winner');
+      ladderNames.children[start].classList.add('done');
+      ladderResultName.textContent = (start + 1) + '번이 도착한 메뉴';
+      ladderResultMenu.textContent = menuName;
+      ladderResult.classList.add('show');
+      Array.prototype.forEach.call(ladderNames.children, function (button) { button.disabled = false; });
+      isTracing = false;
+    }, reduced ? 20 : 1200);
+  }
+
+  function buildLadder() {
+    var count = 10;
+    var menuNames = shuffledMenuNames(count);
+    var rungs = makeRungs(count);
+    var xs = xPositions(count);
+    ladderState = { menuNames: menuNames, rungs: rungs, xs: xs };
+    isTracing = false;
+
+    ladderNames.innerHTML = '';
+    ladderMenus.innerHTML = '';
+    ladderNames.style.gridTemplateColumns = 'repeat(10, minmax(0, 1fr))';
+    ladderMenus.style.gridTemplateColumns = 'repeat(10, minmax(0, 1fr))';
+    for (var index = 0; index < count; index++) {
+      (function (choiceIndex) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ladder-name';
+        button.textContent = choiceIndex + 1;
+        button.setAttribute('aria-label', (choiceIndex + 1) + '번 사다리 선택');
+        button.addEventListener('click', function () { showTrace(choiceIndex); });
+        ladderNames.appendChild(button);
+      }(index));
+    }
+    menuNames.forEach(function (menuName) {
+      var item = document.createElement('div');
+      item.className = 'ladder-menu';
+      item.textContent = menuName;
+      ladderMenus.appendChild(item);
+    });
+    drawLadder(count, rungs, xs);
+    ladderResult.classList.remove('show');
+  }
+
+  buildButton.addEventListener('click', buildLadder);
+  buildLadder();
+
+  var recommendButton = document.getElementById('recommend-menu');
+  var recommendStatus = document.getElementById('recommend-status');
+  var recommendations = document.getElementById('recommendations');
+  var recommendationSummary = document.getElementById('recommendation-summary');
+  var recommendationList = document.getElementById('recommendation-list');
+  var weatherInputs = Array.prototype.slice.call(document.querySelectorAll('input[name="weather"]'));
+  var conditionInputs = Array.prototype.slice.call(document.querySelectorAll('input[name="condition"]'));
+  var moodInputs = Array.prototype.slice.call(document.querySelectorAll('input[name="mood"]'));
+  var budgetInputs = Array.prototype.slice.call(document.querySelectorAll('input[name="budget"]'));
+  var timeInputs = Array.prototype.slice.call(document.querySelectorAll('input[name="time"]'));
+  var allRecommendationInputs = weatherInputs.concat(conditionInputs, budgetInputs, timeInputs, moodInputs);
+
+  var weatherLabels = { sunny: '맑음', cloudy: '흐림', rain: '비', snow: '눈', hot: '더움', cold: '추움' };
+  var conditionLabels = { hangover: '해장 필요', hearty: '든든하게', light: '가볍게', cool: '시원하게', warm: '따뜻하게', refresh: '기분전환' };
+  var moodLabels = { good: '팀장님 기분 좋음', neutral: '팀장님 기분 보통', bad: '팀장님 기분 안 좋음' };
+  var budgetLabels = { value: '가성비로', spend: '오늘은 좀 써도 됨' };
+  var timeLabels = { relaxed: '시간 여유 있음', rush: '빨리 먹어야 함' };
+
+  var weatherScores = {
+    sunny: { '제육볶음': 5, '피자': 4.8, '돈가스': 4.6, '회덮밥': 2, '햄버거': 1.5 },
+    cloudy: { '순대국밥': 5, '제육볶음': 4.8, '갈비탕': 4.6, '김치찌개': 2, '피자': 1.5 },
+    rain: { '김치찌개': 5, '부대찌개': 4.8, '중국집': 4.6, '순대국밥': 2, '갈비탕': 1.5 },
+    snow: { '갈비탕': 5, '부대찌개': 4.8, '추어탕': 4.6, '김치찌개': 2, '순대국밥': 1.5 },
+    hot: { '회덮밥': 5, '햄버거': 4.8, '중국집': 4.6, '피자': 2, '돈가스': 1.5 },
+    cold: { '김치찌개': 5, '순대국밥': 4.8, '갈비탕': 4.6, '부대찌개': 2, '추어탕': 1.5 }
+  };
+
+  var conditionScores = {
+    hangover: { '추어탕': 5, '순대국밥': 4.8, '김치찌개': 4.6, '갈비탕': 2, '중국집': 1.5 },
+    hearty: { '제육볶음': 5, '돈가스': 4.8, '갈비탕': 4.6, '순대국밥': 2, '부대찌개': 1.5 },
+    light: { '회덮밥': 5, '햄버거': 4.8, '김치찌개': 4.6, '중국집': 2, '피자': 1.5 },
+    cool: { '회덮밥': 5, '햄버거': 4.8, '중국집': 4.6, '피자': 2, '돈가스': 1.5 },
+    warm: { '김치찌개': 5, '부대찌개': 4.8, '갈비탕': 4.6, '순대국밥': 2, '추어탕': 1.5 },
+    refresh: { '피자': 5, '중국집': 4.8, '제육볶음': 4.6, '햄버거': 2, '돈가스': 1.5 }
+  };
+
+  var moodScores = {
+    good: { '피자': 5, '중국집': 4.8, '회덮밥': 4.6, '갈비탕': 4.4 },
+    neutral: {},
+    bad: { '김치찌개': 5, '제육볶음': 4.8, '햄버거': 4.6 }
+  };
+
+  var budgetScores = {
+    value: { '김치찌개': 5, '제육볶음': 4.8, '부대찌개': 4.6, '순대국밥': 4.4 },
+    spend: { '회덮밥': 5, '갈비탕': 4.8, '피자': 4.6, '돈가스': 4.4 }
+  };
+
+  var timeScores = {
+    relaxed: { '갈비탕': 5, '추어탕': 4.8, '중국집': 4.6 },
+    rush: { '김치찌개': 5, '제육볶음': 4.8, '햄버거': 4.6, '회덮밥': 4.4 }
+  };
+
+  function selectedValue(inputs) {
+    for (var i = 0; i < inputs.length; i++) if (inputs[i].checked) return inputs[i].value;
+    return '';
+  }
+
+  function hasMenu(list, menuName) {
+    return list.indexOf(menuName) !== -1;
+  }
+
+  function weatherReason(weather, menuName) {
+    var soupMenus = ['김치찌개', '부대찌개', '순대국밥', '추어탕', '갈비탕'];
+    var isSoup = hasMenu(soupMenus, menuName);
+    if (weather === 'rain') return isSoup ? '비 오는 날 뜨끈한 국물이 잘 어울려요' : (menuName === '중국집' ? '짬뽕처럼 비 오는 날 잘 맞는 선택이에요' : '비 오는 날 처지는 입맛을 깨워줘요');
+    if (weather === 'snow') return isSoup ? '눈 오는 날 몸을 따뜻하게 데워줘요' : '눈 오는 날 든든한 에너지를 채워줘요';
+    if (weather === 'hot') return menuName === '회덮밥' ? '더운 날 새콤하고 시원하게 즐기기 좋아요' : (menuName === '중국집' ? '시원한 면 메뉴로 더위를 피할 수 있어요' : '더운 날 비교적 간편하게 먹기 좋아요');
+    if (weather === 'cold') return isSoup ? '찬 기운을 녹여줄 뜨끈한 메뉴예요' : '추운 날 필요한 든든함을 채워줘요';
+    if (weather === 'cloudy') return '흐린 날 처지는 입맛에 활기를 더해줘요';
+    return '맑은 날 기분 좋은 활력을 더해줘요';
+  }
+
+  function conditionReason(condition, menuName) {
+    if (condition === 'hangover') return hasMenu(['추어탕', '순대국밥', '김치찌개', '갈비탕'], menuName) ? '국물 한 숟갈로 속을 편안하게 풀기 좋아요' : '칼칼한 맛으로 답답한 속을 깨우기 좋아요';
+    if (condition === 'hearty') return '밥심과 포만감을 든든하게 채울 수 있어요';
+    if (condition === 'light') return menuName === '회덮밥' ? '채소와 회를 산뜻하게 곁들여 부담이 적어요' : '간편하게 먹고 오후 일정을 이어가기 좋아요';
+    if (condition === 'cool') return menuName === '회덮밥' ? '새콤한 맛과 아삭한 채소가 산뜻해요' : '답답하지 않게 산뜻한 한 끼로 즐기기 좋아요';
+    if (condition === 'warm') return '따뜻한 온기로 속까지 편안하게 채워줘요';
+    return '평소와 다른 맛의 재미로 점심 분위기를 바꾸기 좋아요';
+  }
+
+  function moodReason(mood, menuName) {
+    if (mood === 'good') {
+      if (hasMenu(['피자', '중국집'], menuName)) return '팀장님과 함께 나눠 먹기 좋아요';
+      if (hasMenu(['회덮밥', '갈비탕'], menuName)) return '기분 좋은 날 조금 특별하게 먹기 좋아요';
+      return '밝은 점심 분위기에도 무난해요';
+    }
+    if (mood === 'bad') return hasMenu(['김치찌개', '제육볶음', '햄버거'], menuName) ? '조용히 빨리 먹고 나오기 좋아요' : '차분하게 식사하기 좋은 선택이에요';
+    return '호불호가 적어 무난하게 고르기 좋아요';
+  }
+
+  function budgetReason(budget, menuName) {
+    if (budget === 'value' && hasMenu(['김치찌개', '제육볶음', '부대찌개', '순대국밥'], menuName)) return '가성비도 챙길 수 있어요';
+    if (budget === 'spend' && hasMenu(['회덮밥', '갈비탕', '피자', '돈가스'], menuName)) return '조금 써도 되는 날 만족도 높은 메뉴예요';
+    return '';
+  }
+
+  function timeReason(time, menuName) {
+    if (time === 'relaxed' && hasMenu(['갈비탕', '추어탕', '중국집'], menuName)) return '시간을 두고 여유롭게 즐기기 좋아요';
+    if (time === 'rush' && hasMenu(['김치찌개', '제육볶음', '햄버거', '회덮밥'], menuName)) return '빨리 나와 바쁜 점심에 잘 맞아요';
+    return '';
+  }
+
+  function recommendationReason(weather, condition, mood, budget, time, menuName) {
+    var reasons = [weatherReason(weather, menuName), conditionReason(condition, menuName)];
+    var budgetText = budgetReason(budget, menuName);
+    var timeText = timeReason(time, menuName);
+    if (budgetText) reasons.push(budgetText);
+    if (timeText) reasons.push(timeText);
+    reasons.push(moodReason(mood, menuName));
+    return reasons.join(' · ');
+  }
+
+  function currentAnswers() {
+    return [
+      selectedValue(weatherInputs),
+      selectedValue(conditionInputs),
+      selectedValue(budgetInputs),
+      selectedValue(timeInputs),
+      selectedValue(moodInputs)
+    ];
+  }
+
+  function updateRecommendationStatus() {
+    var answers = currentAnswers();
+    var completed = answers.filter(function (value) { return !!value; }).length;
+    recommendations.classList.remove('show');
+    recommendStatus.textContent = completed === 5 ? '5개 답변 완료. 11개 메뉴를 비교해볼게요.' : (5 - completed) + '개 질문이 남았어요.';
+  }
+
+  allRecommendationInputs.forEach(function (input) {
+    input.addEventListener('change', updateRecommendationStatus);
+  });
+
+  recommendButton.addEventListener('click', function () {
+    var weather = selectedValue(weatherInputs);
+    var condition = selectedValue(conditionInputs);
+    var mood = selectedValue(moodInputs);
+    var budget = selectedValue(budgetInputs);
+    var time = selectedValue(timeInputs);
+    var missing = [];
+    if (!weather) missing.push('날씨');
+    if (!condition) missing.push('컨디션');
+    if (!budget) missing.push('예산');
+    if (!time) missing.push('시간 여유');
+    if (!mood) missing.push('팀장님 기분');
+    if (missing.length) {
+      recommendStatus.textContent = missing.join(', ') + ' 항목을 골라주세요.';
+      return;
+    }
+
+    var ranked = menus.map(function (menu, index) {
+      return {
+        name: menu.name,
+        score: (weatherScores[weather][menu.name] || 0) +
+          (conditionScores[condition][menu.name] || 0) +
+          (moodScores[mood][menu.name] || 0) +
+          (budgetScores[budget][menu.name] || 0) +
+          (timeScores[time][menu.name] || 0),
+        order: index
+      };
+    }).sort(function (a, b) { return b.score - a.score || a.order - b.order; }).slice(0, 3);
+
+    recommendationList.innerHTML = '';
+    ranked.forEach(function (item, index) {
+      var card = document.createElement('li');
+      card.className = 'recommendation-card';
+      var rank = document.createElement('span');
+      rank.className = 'recommendation-rank';
+      rank.textContent = index + 1;
+      var name = document.createElement('h4');
+      name.className = 'recommendation-name';
+      name.textContent = item.name;
+      var reason = document.createElement('p');
+      reason.className = 'recommendation-reason';
+      reason.textContent = recommendationReason(weather, condition, mood, budget, time, item.name);
+      card.appendChild(rank); card.appendChild(name); card.appendChild(reason);
+      recommendationList.appendChild(card);
+    });
+
+    recommendationSummary.textContent = [weatherLabels[weather], conditionLabels[condition], budgetLabels[budget], timeLabels[time], moodLabels[mood]].join(' · ') + '을 모두 반영한 순서예요.';
+    recommendStatus.textContent = '11개 메뉴를 비교해 가장 잘 맞는 3개를 골랐어요.';
+    recommendations.classList.add('show');
+    recommendations.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  });
+}());
+</script>
+</body>
+</html>
